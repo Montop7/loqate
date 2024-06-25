@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Find</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 50%;
+            height: 50%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: left;
+            border-bottom: 1px solid;
+            padding-bottom: 10px;;
+        }
+        #address-fields {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        #heading-text {
+            margin-bottom: 10px;
+            padding-top: 20px;
+            padding-left: 20px;
+            padding-bottom: 20px;
+            font-weight: bold;
+            color: black; /* Match the color seen in the image */
+        }
+        #address-input {
+            width: 100%; /* Take full width */
+            max-width: 300px; /* Restrict max width to match the image */
+            padding: 10px;
+            padding-left: 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #suggestions {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            background: white;
+            z-index: 1000;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            width: 100%; /* Take full width */
+            max-width: 300px; /* Restrict max width to match the input box */
+            overflow-y:auto;
+            &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(189, 77, 77); /* Change this for desired color */
+  }
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search for Address</h1>
+        <div id="address-fields">
+            <span id="heading-text">Enter Your Address</span>
+            <input type="text" id="address-input" placeholder="Enter an address..." />
+            <div id="suggestions"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('address-input').addEventListener('input', function() {
+            const query = this.value;
+            const suggestionsContainer = document.getElementById('suggestions');
+            if (query.length===0) {
+                document.getElementById('suggestions').innerHTML = '';
+                return;
+            }
+            const xhr = new XMLHttpRequest();
+            const apiKey = 'NW27-YE71-PT95-XP92'; 
+            const url = `https://api.addressy.com/Capture/Interactive/Find/v1.10/json3.ws?Key=${apiKey}&Text=${query}&IsMiddleware=False&Container=&Origin=&Countries=&Limit=10&Fields=City,ProvinceName,PostalCode,CountryName`;
+
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    const suggestions = response.Items || [];
+                    const suggestionsContainer = document.getElementById('suggestions');
+                    suggestionsContainer.innerHTML = '';
+
+                    suggestions.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.textContent = item.Text;
+                        document.addEventListener('click', function(event) {
+                        const input = document.getElementById('address-input');
+                        const suggestionsContainer = document.getElementById('suggestions');
+                        if (!input.contains(event.target) && !suggestionsContainer.contains(event.target)) {
+                            suggestionsContainer.innerHTML = '';
+                        }
+                        });
+                        div.addEventListener('click', function() {
+                            document.getElementById('address-input').value = item.Text;
+                            suggestionsContainer.innerHTML = '';
+                        });
+                        suggestionsContainer.appendChild(div);
+                    });
+                } else if (xhr.readyState === 4) {
+                    console.error('Error fetching address suggestions:', xhr.statusText);
+                }
+            };
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
