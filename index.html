@@ -106,7 +106,7 @@
                 return;
             }
             const xhr = new XMLHttpRequest();
-            const apiKey = 'NW27-YE71-PT95-XP92'; 
+            const apiKey = 'API_KEY'; 
             const url = `https://api.addressy.com/Capture/Interactive/Find/v1.10/json3.ws?Key=${apiKey}&Text=${query}&IsMiddleware=False&Container=&Origin=&Countries=&Limit=10&Fields=City,ProvinceName,PostalCode,CountryName`;
 
             xhr.open('GET', url, true);
